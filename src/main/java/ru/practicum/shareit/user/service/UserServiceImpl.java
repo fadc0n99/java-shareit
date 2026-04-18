@@ -33,21 +33,19 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateUser(UpdateUserDto userDto, Long userId) {
-        User currentUser = userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
+        User currentUser = getUserOrThrow(userId);
 
-        if (userDto.getName() != null && !userDto.getName().equals(currentUser.getName())) {
+        if (userDto.getName() != null) {
             currentUser.setName(userDto.getName());
         }
-        if (userDto.getEmail() != null && !userDto.getEmail().equals(currentUser.getEmail())) {
+        if (userDto.getEmail() != null) {
             if (isExistsAnotherUserByEmail(userDto.getEmail(), currentUser.getId())) {
                 throw new EmailConflictException(String.format("Email %s is already taken", userDto.getEmail()));
             }
             currentUser.setEmail(userDto.getEmail());
         }
 
-        return UserMapper.toDto(userRepository.save(currentUser));
+        return UserMapper.toDto(currentUser);
     }
 
     @Override
@@ -58,9 +56,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUser(Long userId) {
-        User currentUser = userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
+        User currentUser = getUserOrThrow(userId);
         return UserMapper.toDto(currentUser);
     }
 
@@ -70,6 +66,12 @@ public class UserServiceImpl implements UserService {
 
     private boolean isExistsAnotherUserByEmail(String email, Long userId) {
         return userRepository.existsByEmailAndIdNot(email, userId);
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
     }
 }
 

@@ -26,9 +26,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ResponseItemDto createItem(RequestItemDto itemDto, Long userId) {
-        User owner = userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
+        User owner = getUserOrThrow(userId);
 
         Item item = ItemMapper.toEntity(itemDto, owner);
         return ItemMapper.toDto(itemRepository.save(item));
@@ -37,13 +35,8 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional
     public ResponseItemDto updateItem(RequestItemDto itemDto, Long itemId, Long userId) {
-        User owner = userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
-
-        Item currentItem = itemRepository.findById(itemId)
-                .orElseThrow(
-                        () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
+        User owner = getUserOrThrow(userId);
+        Item currentItem = getItemOrThrow(itemId);
 
         if (!currentItem.getOwner().getId().equals(owner.getId())) {
             throw new IllegalArgumentException("Only the owner can edit item");
@@ -59,14 +52,13 @@ public class ItemServiceImpl implements ItemService {
             currentItem.setAvailable(itemDto.getAvailable());
         }
 
-        return ItemMapper.toDto(itemRepository.save(currentItem));
+        return ItemMapper.toDto(currentItem);
     }
 
     @Override
     public ResponseItemDto getItemById(Long itemId) {
-        Item currentItem = itemRepository.findById(itemId)
-                .orElseThrow(
-                        () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
+        Item currentItem = getItemOrThrow(itemId);
+
         return ItemMapper.toDto(currentItem);
     }
 
@@ -81,10 +73,22 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ResponseItemDto> searchAvailableItems(String text) {
-        List<Item> items = itemRepository.searchByText(text);
+        List<Item> items = itemRepository.searchAvailableItemsByText(text);
 
         return items.stream()
                 .map(ItemMapper::toDto)
                 .toList();
+    }
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(
+                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
+    }
+
+    private Item getItemOrThrow(Long itemId) {
+        return itemRepository.findById(itemId)
+                .orElseThrow(
+                        () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
     }
 }
