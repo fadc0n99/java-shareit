@@ -5,25 +5,26 @@ import lombok.NoArgsConstructor;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.user.model.User;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class ItemMapper {
 
-    public static Item toEntity(RequestItemDto itemDto, Long userId) {
-        return Item.builder()
-                .name(itemDto.getName())
-                .description(itemDto.getDescription())
-                .available(itemDto.getAvailable())
-                .ownerId(userId)
-                .build();
+    public static Item toEntity(RequestItemDto itemDto, User user) {
+        Item item = new Item();
+        item.setName(itemDto.getName());
+        item.setDescription(itemDto.getDescription());
+        item.setAvailable(itemDto.getAvailable());
+        item.setOwner(user);
+        return item;
     }
 
     public static ResponseItemDto toDto(Item item) {
-        return ResponseItemDto.builder()
-                .id(item.getId())
-                .name(item.getName())
-                .description(item.getDescription())
-                .available(item.getAvailable())
-                .build();
+        ResponseItemDto responseItemDto = new ResponseItemDto();
+        responseItemDto.setId(item.getId());
+        responseItemDto.setName(item.getName());
+        responseItemDto.setDescription(item.getDescription());
+        responseItemDto.setAvailable(item.getAvailable());
+        return responseItemDto;
     }
 }

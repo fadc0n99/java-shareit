@@ -2,6 +2,7 @@ package ru.practicum.shareit.user.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
@@ -13,40 +14,46 @@ import ru.practicum.shareit.user.repository.UserRepository;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public UserResponseDto createUser(CreateUserDto userDto) {
-        validateExistsUserByEmail(userDto.getEmail());
+        if (isExistsAnyUserByEmail(userDto.getEmail())) {
+            throw new EmailConflictException(String.format("Email %s is already exists", userDto.getEmail()));
+        }
 
         User user = UserMapper.toEntity(userDto);
-        User newUser = userRepository.add(user);
-        return UserMapper.toDto(newUser);
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     @Override
+    @Transactional
     public UserResponseDto updateUser(UpdateUserDto userDto, Long userId) {
         User currentUser = userRepository.findById(userId)
                 .orElseThrow(
                         () -> new UserNotFoundException(String.format("User with %d not found", userId)));
 
-        if (userDto.getName() != null) {
+        if (userDto.getName() != null && !userDto.getName().equals(currentUser.getName())) {
             currentUser.setName(userDto.getName());
         }
-        if (userDto.getEmail() != null) {
-            validateDuplicateEmail(userDto.getEmail(), userId);
+        if (userDto.getEmail() != null && !userDto.getEmail().equals(currentUser.getEmail())) {
+            if (isExistsAnotherUserByEmail(userDto.getEmail(), currentUser.getId())) {
+                throw new EmailConflictException(String.format("Email %s is already taken", userDto.getEmail()));
+            }
             currentUser.setEmail(userDto.getEmail());
         }
 
-        User updatedUser = userRepository.update(currentUser);
-        return UserMapper.toDto(updatedUser);
+        return UserMapper.toDto(userRepository.save(currentUser));
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
-        userRepository.delete(userId);
+        userRepository.deleteById(userId);
     }
 
     @Override
@@ -57,17 +64,12 @@ public class UserServiceImpl implements UserService {
         return UserMapper.toDto(currentUser);
     }
 
-    private void validateExistsUserByEmail(String email) {
-        boolean isSameEmail = userRepository.isExistsByEmail(email);
-        if (isSameEmail) {
-            throw new EmailConflictException(String.format("Email %s is already exists", email));
-        }
+    private boolean isExistsAnyUserByEmail(String email) {
+        return userRepository.existsByEmail(email);
     }
 
-    private void validateDuplicateEmail(String email, Long userId) {
-        boolean isDuplicate = userRepository.isDuplicateEmail(email, userId);
-        if (isDuplicate) {
-            throw new EmailConflictException(String.format("Email %s is already taken", email));
-        }
+    private boolean isExistsAnotherUserByEmail(String email, Long userId) {
+        return userRepository.existsByEmailAndIdNot(email, userId);
     }
 }
+
