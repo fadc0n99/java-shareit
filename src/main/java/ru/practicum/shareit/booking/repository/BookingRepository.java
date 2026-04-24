@@ -4,9 +4,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
-import ru.practicum.shareit.booking.model.BookingState;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,15 +19,15 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             JOIN FETCH b.item i
             WHERE i.owner.id = :ownerId
             AND (:state = 'ALL'
-                OR (:state = 'CURRENT' AND b.start <= :now AND b.end >= :now)
-                OR (:state = 'PAST' AND b.end < :now)
-                OR (:state = 'FUTURE' AND b.start > :now)
+                OR (:state = 'CURRENT' AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP)
+                OR (:state = 'PAST' AND b.end < :CURRENT_TIMESTAMP)
+                OR (:state = 'FUTURE' AND b.start > CURRENT_TIMESTAMP)
                 OR (:state = 'WAITING' AND b.status = 'WAITING')
                 OR (:state = 'REJECTED' AND b.status = 'REJECTED')
             )
             ORDER BY b.start DESC
             """)
-    List<Booking> findOwnerBookingsByState(Long ownerId, String state, LocalDateTime now);
+    List<Booking> findOwnerBookingsByState(Long ownerId, String state);
 
     @Query("""
             SELECT b FROM Booking b
@@ -37,13 +35,39 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             JOIN FETCH b.item i
             WHERE bkr.id = :bookerId
             AND (:state = 'ALL'
-                OR (:state = 'CURRENT' AND b.start <= :now AND b.end >= :now)
-                OR (:state = 'PAST' AND b.end < :now)
-                OR (:state = 'FUTURE' AND b.start > :now)
+                OR (:state = 'CURRENT' AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP)
+                OR (:state = 'PAST' AND b.end < CURRENT_TIMESTAMP)
+                OR (:state = 'FUTURE' AND b.start > CURRENT_TIMESTAMP)
                 OR (:state = 'WAITING' AND b.status = 'WAITING')
                 OR (:state = 'REJECTED' AND b.status = 'REJECTED')
             )
             ORDER BY b.start DESC
             """)
-    List<Booking> findUserBookingsByState(Long bookerId, String state, LocalDateTime now);
+    List<Booking> findUserBookingsByState(Long bookerId, String state);
+
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.item i
+            WHERE b.item.id IN :itemIds
+            AND b.end = (
+                SELECT MAX(b2.end) FROM Booking b2
+                WHERE b2.item.id = b.item.id
+                AND b2.status = 'APPROVED'
+                and b2.start < CURRENT_TIMESTAMP
+            )
+            """)
+    List<Booking> findLastItemsBooking(List<Long> itemIds);
+
+    @Query("""
+            SELECT b FROM Booking b
+            JOIN FETCH b.item i
+            WHERE b.item.id IN :itemIds
+            AND b.end = (
+                SELECT MIN(b2.end) FROM Booking b2
+                WHERE b2.item.id = b.item.id
+                AND b2.status = 'APPROVED'
+                and b2.start > CURRENT_TIMESTAMP
+            )
+            """)
+    List<Booking> findNextItemsBooking(List<Long> itemIds);
 }

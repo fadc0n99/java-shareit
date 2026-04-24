@@ -3,15 +3,21 @@ package ru.practicum.shareit.item.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.booking.utils.EntityUtils;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,6 +25,7 @@ import java.util.List;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
+    private final BookingRepository bookingRepository;
     private final EntityUtils entityUtils;
 
     @Override
@@ -61,11 +68,35 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ResponseItemDto> getOwnerItems(Long userId) {
+    public List<ResponseOwnerItemDto> getOwnerItems(Long userId) {
+        entityUtils.checkUserExists(userId);
+
         List<Item> items = itemRepository.findByOwnerId(userId);
+        if (items.isEmpty()) {
+            return List.of();
+        }
+
+        List<Long> itemIds = items.stream().map(Item::getId).toList();
+
+        Map<Long, Booking> lastBookings = bookingRepository.findLastItemsBooking(itemIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        booking -> booking.getItem().getId(),
+                        Function.identity()
+                ));
+        Map<Long, Booking> nextBookings = bookingRepository.findNextItemsBooking(itemIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        booking -> booking.getItem().getId(),
+                        Function.identity()
+                ));
 
         return items.stream()
-                .map(ItemMapper::toDto)
+                .map(item -> ItemMapper.toOwnerDto(
+                        item,
+                        lastBookings.get(item.getId()),
+                        nextBookings.get(item.getId()))
+                )
                 .toList();
     }
 

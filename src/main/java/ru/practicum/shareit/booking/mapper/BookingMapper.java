@@ -3,6 +3,7 @@ package ru.practicum.shareit.booking.mapper;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import ru.practicum.shareit.booking.dto.BookingDto;
+import ru.practicum.shareit.booking.dto.InfoBookingDto;
 import ru.practicum.shareit.booking.dto.ResponseBookingDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
@@ -48,6 +49,16 @@ public final class BookingMapper {
         dto.setBooker(UserMapper.toDto(booking.getBooker()));
         dto.setItem(ItemMapper.toDto(booking.getItem()));
         return dto;
+    }
+
+    public static InfoBookingDto toInfoDto(Booking booking) {
+        if (booking == null) return null;
+
+        InfoBookingDto infoBookingDto = new InfoBookingDto();
+        infoBookingDto.setId(booking.getId());
+        infoBookingDto.setStart(booking.getStart());
+        infoBookingDto.setEnd(booking.getEnd());
+        return infoBookingDto;
     }
 
     public static List<ResponseBookingDto> toDtos(List<Booking> bookings) {

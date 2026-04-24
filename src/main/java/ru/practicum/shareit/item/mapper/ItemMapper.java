@@ -2,8 +2,11 @@ package ru.practicum.shareit.item.mapper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -25,6 +28,17 @@ public final class ItemMapper {
         responseItemDto.setName(item.getName());
         responseItemDto.setDescription(item.getDescription());
         responseItemDto.setAvailable(item.getAvailable());
+        return responseItemDto;
+    }
+
+    public static ResponseOwnerItemDto toOwnerDto(Item item, Booking last, Booking next) {
+        ResponseOwnerItemDto responseItemDto = new ResponseOwnerItemDto();
+        responseItemDto.setId(item.getId());
+        responseItemDto.setName(item.getName());
+        responseItemDto.setDescription(item.getDescription());
+        responseItemDto.setAvailable(item.getAvailable());
+        responseItemDto.setLastBooking(BookingMapper.toInfoDto(last));
+        responseItemDto.setNextBooking(BookingMapper.toInfoDto(next));
         return responseItemDto;
     }
 }

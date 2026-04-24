@@ -92,8 +92,8 @@ public class BookingServiceImpl implements BookingService {
         BookingState effectiveState = state != null ? state : BookingState.ALL;
 
         return isOwner ?
-                bookingRepository.findOwnerBookingsByState(userId, effectiveState.getState(), LocalDateTime.now()) :
-                bookingRepository.findUserBookingsByState(userId, effectiveState.getState(), LocalDateTime.now());
+                bookingRepository.findOwnerBookingsByState(userId, effectiveState.getState()) :
+                bookingRepository.findUserBookingsByState(userId, effectiveState.getState());
     }
 
     private void checkBookingPeriod(LocalDateTime start, LocalDateTime end) {

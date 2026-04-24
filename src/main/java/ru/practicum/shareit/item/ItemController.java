@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
+import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ResponseItemDto>> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ResponseOwnerItemDto>> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return ResponseEntity.ok(itemService.getOwnerItems(userId));
     }
 
