@@ -3,8 +3,8 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.utils.EntityUtils;
 import ru.practicum.shareit.exception.EmailConflictException;
-import ru.practicum.shareit.exception.UserNotFoundException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
 import ru.practicum.shareit.user.dto.UserResponseDto;
@@ -18,6 +18,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final EntityUtils entityUtils;
 
     @Override
     @Transactional
@@ -33,7 +34,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateUser(UpdateUserDto userDto, Long userId) {
-        User currentUser = getUserOrThrow(userId);
+        User currentUser = entityUtils.getUserOrThrow(userId);
 
         if (userDto.getName() != null) {
             currentUser.setName(userDto.getName());
@@ -56,7 +57,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUser(Long userId) {
-        User currentUser = getUserOrThrow(userId);
+        User currentUser = entityUtils.getUserOrThrow(userId);
         return UserMapper.toDto(currentUser);
     }
 
@@ -66,12 +67,6 @@ public class UserServiceImpl implements UserService {
 
     private boolean isExistsAnotherUserByEmail(String email, Long userId) {
         return userRepository.existsByEmailAndIdNot(email, userId);
-    }
-
-    private User getUserOrThrow(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(
-                        () -> new UserNotFoundException(String.format("User with %d not found", userId)));
     }
 }
 
