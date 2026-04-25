@@ -70,4 +70,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             )
             """)
     List<Booking> findNextItemsBooking(List<Long> itemIds);
+
+    @Query("""
+            SELECT COUNT(b) > 0 FROM Booking b
+            WHERE b.item.id = :itemId AND b.booker.id = :userId
+            AND b.end < CURRENT_TIMESTAMP
+            """)
+    boolean hasUserCompletedBooking(long userId, long itemId);
 }

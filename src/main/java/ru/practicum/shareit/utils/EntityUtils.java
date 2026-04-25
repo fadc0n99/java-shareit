@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.utils;
+package ru.practicum.shareit.utils;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -28,6 +28,12 @@ public class EntityUtils {
 
     public Item getItemOrThrow(Long itemId) {
         return itemRepository.findById(itemId)
+                .orElseThrow(
+                        () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
+    }
+
+    public Item getItemWithCommentsOrThrow(Long itemId) {
+        return itemRepository.findWithCommentsById(itemId)
                 .orElseThrow(
                         () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
     }

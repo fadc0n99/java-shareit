@@ -5,10 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.utils.EntityUtils;
+import ru.practicum.shareit.exception.ValidationException;
+import ru.practicum.shareit.item.mapper.CommentMapper;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.repository.CommentRepository;
+import ru.practicum.shareit.utils.EntityUtils;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
-import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
@@ -26,6 +30,7 @@ public class ItemServiceImpl implements ItemService {
 
     private final ItemRepository itemRepository;
     private final BookingRepository bookingRepository;
+    private final CommentRepository commentRepository;
     private final EntityUtils entityUtils;
 
     @Override
@@ -62,13 +67,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ResponseItemDto getItemById(Long itemId) {
-        Item currentItem = entityUtils.getItemOrThrow(itemId);
+        Item currentItem = entityUtils.getItemWithCommentsOrThrow(itemId);
 
         return ItemMapper.toDto(currentItem);
     }
 
     @Override
-    public List<ResponseOwnerItemDto> getOwnerItems(Long userId) {
+    public List<ResponseItemDto> getOwnerItems(Long userId) {
         entityUtils.checkUserExists(userId);
 
         List<Item> items = itemRepository.findByOwnerId(userId);
@@ -107,5 +112,19 @@ public class ItemServiceImpl implements ItemService {
         return items.stream()
                 .map(ItemMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public CommentDto createComment(Long userId, Long itemId, CommentDto dto) {
+        Item item = entityUtils.getItemOrThrow(itemId);
+        User author = entityUtils.getUserOrThrow(userId);
+
+        if (!bookingRepository.hasUserCompletedBooking(userId, itemId)) {
+            throw new ValidationException("Comment available only for renters");
+        }
+
+        Comment newComment = CommentMapper.toEntity(dto, item, author);
+        return CommentMapper.toDto(commentRepository.save(newComment));
     }
 }

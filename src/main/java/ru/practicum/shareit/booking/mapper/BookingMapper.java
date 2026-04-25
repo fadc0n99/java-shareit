@@ -27,19 +27,6 @@ public final class BookingMapper {
         return booking;
     }
 
-    public static ResponseBookingDto toDto(Booking booking, User booker, Item item) {
-        ResponseBookingDto responseBookingDto = new ResponseBookingDto();
-
-        responseBookingDto.setId(booking.getId());
-        responseBookingDto.setBooker(UserMapper.toDto(booker));
-        responseBookingDto.setStart(booking.getStart());
-        responseBookingDto.setEnd(booking.getEnd());
-        responseBookingDto.setStatus(booking.getStatus());
-        responseBookingDto.setItem(ItemMapper.toDto(item));
-
-        return responseBookingDto;
-    }
-
     public static ResponseBookingDto toDto(Booking booking) {
         ResponseBookingDto dto = new ResponseBookingDto();
         dto.setId(booking.getId());
@@ -52,8 +39,6 @@ public final class BookingMapper {
     }
 
     public static InfoBookingDto toInfoDto(Booking booking) {
-        if (booking == null) return null;
-
         InfoBookingDto infoBookingDto = new InfoBookingDto();
         infoBookingDto.setId(booking.getId());
         infoBookingDto.setStart(booking.getStart());

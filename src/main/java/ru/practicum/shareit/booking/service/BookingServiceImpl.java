@@ -9,7 +9,7 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.booking.utils.EntityUtils;
+import ru.practicum.shareit.utils.EntityUtils;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
@@ -42,9 +42,7 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking booking = BookingMapper.toEntity(bookingDto, user, item);
-
-        Booking savedBooking = bookingRepository.save(booking);
-        return BookingMapper.toDto(savedBooking, user, item);
+        return BookingMapper.toDto(bookingRepository.save(booking));
     }
 
     @Override
@@ -63,6 +61,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public ResponseBookingDto getBooking(Long userId, Long bookingId) {
+        entityUtils.checkUserExists(userId);
         Booking booking = entityUtils.getBookingWithOwnerOrThrow(bookingId);
 
         boolean isBooker = booking.getBooker().getId().equals(userId);
@@ -108,9 +107,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private boolean isBookingItemOwner(Booking booking, Long checkUserId) {
-        Long userIdFromBooking = booking.getItem().getOwner().getId();
+        User bookingOwner = booking.getItem().getOwner();
 
-        return Objects.equals(userIdFromBooking, checkUserId);
+        return Objects.equals(bookingOwner.getId(), checkUserId);
     }
 
 }

@@ -6,7 +6,6 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
-import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
 
@@ -28,17 +27,21 @@ public final class ItemMapper {
         responseItemDto.setName(item.getName());
         responseItemDto.setDescription(item.getDescription());
         responseItemDto.setAvailable(item.getAvailable());
+        responseItemDto.setComments(CommentMapper.toDtos(item.getComments()));
         return responseItemDto;
     }
 
-    public static ResponseOwnerItemDto toOwnerDto(Item item, Booking last, Booking next) {
-        ResponseOwnerItemDto responseItemDto = new ResponseOwnerItemDto();
+    public static ResponseItemDto toOwnerDto(Item item, Booking last, Booking next) {
+        ResponseItemDto responseItemDto = new ResponseItemDto();
         responseItemDto.setId(item.getId());
         responseItemDto.setName(item.getName());
         responseItemDto.setDescription(item.getDescription());
         responseItemDto.setAvailable(item.getAvailable());
-        responseItemDto.setLastBooking(BookingMapper.toInfoDto(last));
-        responseItemDto.setNextBooking(BookingMapper.toInfoDto(next));
+        responseItemDto.setComments(CommentMapper.toDtos(item.getComments()));
+
+        responseItemDto.setLastBooking(last != null ? BookingMapper.toInfoDto(last) : null);
+        responseItemDto.setNextBooking(next != null ? BookingMapper.toInfoDto(next): null);
+
         return responseItemDto;
     }
 }

@@ -4,9 +4,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.RequestItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
-import ru.practicum.shareit.item.dto.ResponseOwnerItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class ItemController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ResponseOwnerItemDto>> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
+    public ResponseEntity<List<ResponseItemDto>> getOwnerItems(@RequestHeader("X-Sharer-User-Id") Long userId) {
         return ResponseEntity.ok(itemService.getOwnerItems(userId));
     }
 
@@ -50,5 +50,15 @@ public class ItemController {
         }
         return ResponseEntity.ok(itemService.searchAvailableItems(text));
     }
+
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> createComment(
+            @RequestHeader("X-Sharer-User-Id") Long userId,
+            @PathVariable Long itemId,
+            @RequestBody CommentDto commentDto) {
+        return ResponseEntity.ok(itemService.createComment(userId, itemId, commentDto));
+    }
+
+
 
 }

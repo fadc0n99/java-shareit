@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import ru.practicum.shareit.user.model.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "items")
 @Getter
@@ -29,4 +32,7 @@ public class Item {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    @OneToMany(mappedBy = "item")
+    private List<Comment> comments = new ArrayList<>();
 }
