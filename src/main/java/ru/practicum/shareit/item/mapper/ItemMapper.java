@@ -40,7 +40,7 @@ public final class ItemMapper {
         responseItemDto.setComments(CommentMapper.toDtos(item.getComments()));
 
         responseItemDto.setLastBooking(last != null ? BookingMapper.toInfoDto(last) : null);
-        responseItemDto.setNextBooking(next != null ? BookingMapper.toInfoDto(next): null);
+        responseItemDto.setNextBooking(next != null ? BookingMapper.toInfoDto(next) : null);
 
         return responseItemDto;
     }
