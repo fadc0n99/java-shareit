@@ -9,10 +9,11 @@ import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.utils.EntityUtils;
+import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.exception.ValidationException;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.repository.UserRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,15 +28,16 @@ import static ru.practicum.shareit.booking.model.BookingStatus.REJECTED;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingRepository bookingRepository;
-    private final EntityUtils entityUtils;
+    private final ItemRepository itemRepository;
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
     public ResponseBookingDto createBooking(BookingDto bookingDto, Long userId) {
         checkBookingPeriod(bookingDto.getStart(), bookingDto.getEnd());
 
-        User user = entityUtils.getUserOrThrow(userId);
-        Item item = entityUtils.getItemOrThrow(bookingDto.getItemId());
+        User user = userRepository.findByIdOrThrow(userId);
+        Item item = itemRepository.findByIdOrThrow(bookingDto.getItemId());
 
         if (Boolean.FALSE.equals(item.getAvailable())) {
             throw new ValidationException("This item is currently unavailable");
@@ -48,7 +50,7 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public ResponseBookingDto resolveBooking(Long userId, Long bookingId, boolean approved) {
-        Booking currentBooking = entityUtils.getBookingWithOwnerOrThrow(bookingId);
+        Booking currentBooking = bookingRepository.findWithRelationsOrThrow(bookingId);
 
         if (!isBookingItemOwner(currentBooking, userId)) {
             throw new ValidationException(String.format("User %s is not the owner", userId));
@@ -61,8 +63,8 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public ResponseBookingDto getBooking(Long userId, Long bookingId) {
-        entityUtils.checkUserExists(userId);
-        Booking booking = entityUtils.getBookingWithOwnerOrThrow(bookingId);
+        userRepository.findByIdOrThrow(userId);
+        Booking booking = bookingRepository.findWithRelationsOrThrow(bookingId);
 
         boolean isBooker = booking.getBooker().getId().equals(userId);
         if (!isBooker && !isBookingItemOwner(booking, userId)) {
@@ -87,12 +89,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     private List<Booking> getBookingsByUserAndState(Long userId, BookingState state, boolean isOwner) {
-        entityUtils.checkUserExists(userId);
+        userRepository.findByIdOrThrow(userId);
         BookingState effectiveState = state != null ? state : BookingState.ALL;
 
         return isOwner ?
-                bookingRepository.findOwnerBookingsByState(userId, effectiveState.getState()) :
-                bookingRepository.findUserBookingsByState(userId, effectiveState.getState());
+                bookingRepository.findOwnerBookingsByState(userId, effectiveState.name()) :
+                bookingRepository.findUserBookingsByState(userId, effectiveState.name());
     }
 
     private void checkBookingPeriod(LocalDateTime start, LocalDateTime end) {

@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.exception.BookingNotFoundException;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,7 +12,14 @@ import java.util.Optional;
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @EntityGraph(attributePaths = {"item", "item.owner", "booker"})
-    Optional<Booking> findWithOwnerById(long bookingId);
+    Optional<Booking> findWithRelationsById(long bookingId);
+
+    default Booking findWithRelationsOrThrow(long bookingId) {
+        return findWithRelationsById(bookingId)
+                .orElseThrow(
+                        () -> new BookingNotFoundException(String.format("Booking with %d not found", bookingId))
+                );
+    }
 
     @Query("""
             SELECT b FROM Booking b

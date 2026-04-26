@@ -3,7 +3,6 @@ package ru.practicum.shareit.user.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.practicum.shareit.utils.EntityUtils;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.user.dto.CreateUserDto;
 import ru.practicum.shareit.user.dto.UpdateUserDto;
@@ -18,7 +17,6 @@ import ru.practicum.shareit.user.repository.UserRepository;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final EntityUtils entityUtils;
 
     @Override
     @Transactional
@@ -34,7 +32,7 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public UserResponseDto updateUser(UpdateUserDto userDto, Long userId) {
-        User currentUser = entityUtils.getUserOrThrow(userId);
+        User currentUser = userRepository.findByIdOrThrow(userId);
 
         if (userDto.getName() != null) {
             currentUser.setName(userDto.getName());
@@ -57,7 +55,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponseDto getUser(Long userId) {
-        User currentUser = entityUtils.getUserOrThrow(userId);
+        User currentUser = userRepository.findByIdOrThrow(userId);
         return UserMapper.toDto(currentUser);
     }
 
