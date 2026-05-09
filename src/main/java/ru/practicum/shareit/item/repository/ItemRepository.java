@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
-    @EntityGraph(attributePaths = {"comments", "owner"})
+    @EntityGraph(attributePaths = {"comments", "comments.author", "owner"})
     List<Item> findByOwnerId(long userId);
 
     default Item findByIdOrThrow(long itemId) {
@@ -20,7 +20,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
                         () -> new ItemNotFoundException(String.format("Item with %d not found", itemId)));
     }
 
-    @EntityGraph(attributePaths = {"comments", "owner"})
+    @EntityGraph(attributePaths = {"comments", "comments.author", "owner"})
     Optional<Item> findWithCommentsById(long id);
 
     @Query("SELECT i FROM Item i WHERE " +

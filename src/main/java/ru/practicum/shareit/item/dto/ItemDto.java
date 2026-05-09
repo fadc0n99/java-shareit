@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class RequestItemDto {
+public class ItemDto {
     @NotNull
     @NotBlank
     private String name;
@@ -14,4 +14,5 @@ public class RequestItemDto {
     private String description;
     @NotNull
     private Boolean available;
+    private Long requestId;
 }

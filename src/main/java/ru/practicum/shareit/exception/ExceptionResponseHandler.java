@@ -3,8 +3,11 @@ package ru.practicum.shareit.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class ExceptionResponseHandler {
@@ -18,7 +21,7 @@ public class ExceptionResponseHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, ItemNotFoundException.class, BookingNotFoundException.class, ItemRequestNotFound.class})
     public ResponseEntity<ErrorResponse> handleNotFound(Exception ex) {
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.NOT_FOUND,
@@ -27,12 +30,28 @@ public class ExceptionResponseHandler {
         return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({IllegalArgumentException.class, ValidationException.class})
+    @ExceptionHandler({IllegalArgumentException.class, ValidationException.class, MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorResponse> handleBadRequest(Exception ex) {
+        String error = ex.getMessage();
+        if (ex instanceof MethodArgumentNotValidException methodArgumentNotValidException) {
+            error = methodArgumentNotValidException.getBindingResult().getFieldErrors().stream()
+                    .map(e -> e.getField() + ": " + e.getDefaultMessage())
+                    .collect(Collectors.joining(", "));
+        }
+
         ErrorResponse errorResponse = new ErrorResponse(
                 HttpStatus.BAD_REQUEST,
-                ex.getMessage()
+                error
         );
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleException(Exception ex) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.BAD_REQUEST,
+                "Internal Server Error"
+        );
+        return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

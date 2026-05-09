@@ -34,7 +34,7 @@ public final class BookingMapper {
         dto.setEnd(booking.getEnd());
         dto.setStatus(booking.getStatus());
         dto.setBooker(UserMapper.toDto(booking.getBooker()));
-        dto.setItem(ItemMapper.toDto(booking.getItem()));
+        dto.setItem(ItemMapper.toShortDto(booking.getItem()));
         return dto;
     }
 

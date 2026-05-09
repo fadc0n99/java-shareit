@@ -11,11 +11,12 @@ import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.dto.CommentDto;
-import ru.practicum.shareit.item.dto.RequestItemDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
+import ru.practicum.shareit.request.service.ItemRequestService;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -33,19 +34,24 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestService itemRequestService;
 
     @Override
     @Transactional
-    public ResponseItemDto createItem(RequestItemDto itemDto, Long userId) {
+    public ResponseItemDto createItem(ItemDto itemDto, Long userId) {
         User owner = userRepository.findByIdOrThrow(userId);
 
-        Item item = ItemMapper.toEntity(itemDto, owner);
-        return ItemMapper.toDto(itemRepository.save(item));
+        Item item = itemRepository.save(ItemMapper.toEntity(itemDto, owner));
+        if (itemDto.getRequestId() != null) {
+            itemRequestService.addItemToRequest(itemDto.getRequestId(), item);
+        }
+
+        return ItemMapper.toDto(item);
     }
 
     @Override
     @Transactional
-    public ResponseItemDto updateItem(RequestItemDto itemDto, Long itemId, Long userId) {
+    public ResponseItemDto updateItem(ItemDto itemDto, Long itemId, Long userId) {
         User owner = userRepository.findByIdOrThrow(userId);
         Item currentItem = itemRepository.findByIdOrThrow(itemId);
 

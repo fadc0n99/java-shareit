@@ -25,10 +25,11 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             SELECT b FROM Booking b
             JOIN FETCH b.booker bkr
             JOIN FETCH b.item i
+            JOIN FETCH i.owner o
             WHERE i.owner.id = :ownerId
             AND (:state = 'ALL'
                 OR (:state = 'CURRENT' AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP)
-                OR (:state = 'PAST' AND b.end < :CURRENT_TIMESTAMP)
+                OR (:state = 'PAST' AND b.end < CURRENT_TIMESTAMP)
                 OR (:state = 'FUTURE' AND b.start > CURRENT_TIMESTAMP)
                 OR (:state = 'WAITING' AND b.status = 'WAITING')
                 OR (:state = 'REJECTED' AND b.status = 'REJECTED')
@@ -41,6 +42,7 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
             SELECT b FROM Booking b
             JOIN FETCH b.booker bkr
             JOIN FETCH b.item i
+            JOIN FETCH i.owner o
             WHERE bkr.id = :bookerId
             AND (:state = 'ALL'
                 OR (:state = 'CURRENT' AND b.start <= CURRENT_TIMESTAMP AND b.end >= CURRENT_TIMESTAMP)
