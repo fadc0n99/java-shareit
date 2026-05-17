@@ -54,13 +54,7 @@ class ItemDtoJsonTest {
 
     @Test
     void deserializeItemDto() throws Exception {
-        String content = """
-                {
-                    "name": "Отвертка",
-                    "description": "Крестовая отвертка",
-                    "available": false
-                }
-                """;
+        String content = "{\"name\":\"Отвертка\",\"description\":\"Крестовая отвертка\",\"available\":false}";
 
         ItemDto dto = requestJson.parse(content).getObject();
 
@@ -95,12 +89,7 @@ class ItemDtoJsonTest {
 
     @Test
     void deserializeUpdateItemDto() throws Exception {
-        String content = """
-                {
-                    "name": "Отвертка",
-                    "description": "Крестовая отвертка"
-                }
-                """;
+        String content = "{\"name\":\"Отвертка\",\"description\":\"Крестовая отвертка\"}";
 
         UpdateItemDto dto = updateJson.parse(content).getObject();
 
@@ -130,11 +119,7 @@ class ItemDtoJsonTest {
 
     @Test
     void deserializeRequestCommentDto() throws Exception {
-        String content = """
-                {
-                    "text": "Хороший товар"
-                }
-                """;
+        String content = "{\"text\":\"Хороший товар\"}";
 
         RequestCommentDto dto = commentJson.parse(content).getObject();
 

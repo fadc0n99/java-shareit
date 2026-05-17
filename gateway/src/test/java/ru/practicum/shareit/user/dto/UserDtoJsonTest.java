@@ -47,12 +47,7 @@ class UserDtoJsonTest {
 
     @Test
     void deserializeRequestUserDto() throws Exception {
-        String content = """
-                {
-                    "name": "Вася",
-                    "email": "vasya@mail.com"
-                }
-                """;
+        String content = "{\"name\":\"Вася\",\"email\":\"vasya@mail.com\"}";
 
         RequestUserDto dto = requestJson.parse(content).getObject();
 
@@ -94,11 +89,7 @@ class UserDtoJsonTest {
 
     @Test
     void deserializeUpdateUserDto() throws Exception {
-        String content = """
-                {
-                    "name": "Вася"
-                }
-                """;
+        String content = "{\"name\":\"Вася\"}";
 
         UpdateUserDto dto = updateJson.parse(content).getObject();
 

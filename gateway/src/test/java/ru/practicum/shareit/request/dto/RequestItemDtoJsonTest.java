@@ -43,11 +43,7 @@ class RequestItemDtoJsonTest {
 
     @Test
     void deserializeRequestItemDto() throws Exception {
-        String content = """
-                {
-                    "description": "Нужна отвертка"
-                }
-                """;
+        String content = "{\"description\":\"Нужна отвертка\"}";
 
         RequestItemDto dto = json.parse(content).getObject();
 
