@@ -21,7 +21,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     }
 
     @EntityGraph(attributePaths = {"comments", "comments.author", "owner"})
-    Optional<Item> findWithCommentsById(long id);
+    Optional<Item> findById(long id);
 
     @Query("SELECT i FROM Item i WHERE " +
             "i.available = true AND " +

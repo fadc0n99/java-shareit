@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.RequestCommentDto;
-import ru.practicum.shareit.item.dto.RequestItemDto;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.UpdateItemDto;
 
 @Controller
@@ -23,7 +23,7 @@ public class GatewayItemController {
     @PostMapping
     public ResponseEntity<Object> createItem(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestBody @Valid RequestItemDto itemDto) {
+            @RequestBody @Valid ItemDto itemDto) {
         log.info("Creating item {}, userId={}", itemDto, userId);
         return itemClient.createItem(itemDto, userId);
     }

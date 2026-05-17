@@ -74,7 +74,16 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<ResponseBookingDto> getUserBookings(Long userId, String state, boolean isOwner) {
+    public List<ResponseBookingDto> getUserBookings(Long userId, String state) {
+        return getUserBookings(userId, state, false);
+    }
+
+    @Override
+    public List<ResponseBookingDto> getOwnerBookings(Long ownerId, String state) {
+        return getUserBookings(ownerId, state, true);
+    }
+
+    private List<ResponseBookingDto> getUserBookings(Long userId, String state, boolean isOwner) {
         userRepository.findByIdOrThrow(userId);
 
         List<Booking> userBookings = isOwner ?

@@ -1,0 +1,93 @@
+package ru.practicum.shareit.booking;
+
+import lombok.RequiredArgsConstructor;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.user.dto.UserDto;
+import ru.practicum.shareit.user.service.UserService;
+
+import java.time.LocalDateTime;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+@Transactional
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+@SpringBootTest
+class BookingServiceImplTest {
+
+    private final BookingService bookingService;
+    private final UserService userService;
+    private final ItemService itemService;
+
+    @Test
+    void testGetUserBookings() {
+        var owner = userService.createUser(makeUserDto("Owner", "owner@mail.com"));
+        var booker = userService.createUser(makeUserDto("Booker", "booker@mail.com"));
+        var item = itemService.createItem(makeItemDto("Item", "desc", true), owner.getId());
+
+        var pastBooking = bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(3)),
+                booker.getId()
+        );
+        bookingService.resolveBooking(owner.getId(), pastBooking.getId(), true);
+
+        bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2)),
+                booker.getId()
+        );
+
+        var rejectedBooking = bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().plusDays(3), LocalDateTime.now().plusDays(4)),
+                booker.getId()
+        );
+        bookingService.resolveBooking(owner.getId(), rejectedBooking.getId(), false);
+
+        var currentBooking = bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().minusHours(2), LocalDateTime.now().plusHours(2)),
+                booker.getId()
+        );
+        bookingService.resolveBooking(owner.getId(), currentBooking.getId(), true);
+
+        var asBooker = bookingService.getUserBookings(booker.getId(), "ALL");
+        assertThat(asBooker.size(), equalTo(4));
+        assertThat(bookingService.getUserBookings(booker.getId(), "FUTURE").size(), equalTo(2));
+        assertThat(bookingService.getUserBookings(booker.getId(), "PAST").size(), equalTo(1));
+        assertThat(bookingService.getUserBookings(booker.getId(), "WAITING").size(), equalTo(1));
+        assertThat(bookingService.getUserBookings(booker.getId(), "REJECTED").size(), equalTo(1));
+
+        var asOwner = bookingService.getOwnerBookings(owner.getId(), "ALL");
+        assertThat(asOwner.size(), equalTo(4));
+        assertThat(bookingService.getOwnerBookings(owner.getId(), "WAITING").size(), equalTo(1));
+        assertThat(bookingService.getOwnerBookings(owner.getId(), "CURRENT").size(), equalTo(1));
+    }
+
+    private ItemDto makeItemDto(String name, String description, boolean available) {
+        ItemDto itemDto = new ItemDto();
+        itemDto.setName(name);
+        itemDto.setDescription(description);
+        itemDto.setAvailable(available);
+        return itemDto;
+    }
+
+    private UserDto makeUserDto(String name, String email) {
+        UserDto userDto = new UserDto();
+        userDto.setName(name);
+        userDto.setEmail(email);
+        return userDto;
+    }
+
+    private RequestBookingDto makeBookingDto(Long itemId, LocalDateTime start, LocalDateTime end) {
+        RequestBookingDto bookingDto = new RequestBookingDto();
+        bookingDto.setItemId(itemId);
+        bookingDto.setStart(start);
+        bookingDto.setEnd(end);
+        return bookingDto;
+    }
+}

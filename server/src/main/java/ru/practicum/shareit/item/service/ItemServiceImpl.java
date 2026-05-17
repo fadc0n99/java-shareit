@@ -74,7 +74,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ResponseItemDto getItemById(Long itemId) {
-        Item currentItem = itemRepository.findWithCommentsById(itemId)
+        Item currentItem = itemRepository.findById(itemId)
                 .orElseThrow(
                         () -> new ItemNotFoundException(String.format("Item with %d not found", itemId))
                 );

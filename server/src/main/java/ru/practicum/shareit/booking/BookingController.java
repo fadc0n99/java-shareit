@@ -49,7 +49,7 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @RequestParam(required = false) String state
             ) {
-        return ResponseEntity.ok(bookingService.getUserBookings(userId, state, false));
+        return ResponseEntity.ok(bookingService.getUserBookings(userId, state));
     }
 
     @GetMapping("/owner")
@@ -57,6 +57,6 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") Long ownerId,
             @RequestParam(required = false) String state
     ) {
-        return ResponseEntity.ok(bookingService.getUserBookings(ownerId, state, true));
+        return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state));
     }
 }

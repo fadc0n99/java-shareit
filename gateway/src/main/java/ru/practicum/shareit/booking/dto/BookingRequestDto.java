@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 public class BookingRequestDto {
-    private long itemId;
+    private Long itemId;
     @NotNull
     @FutureOrPresent
     private LocalDateTime start;

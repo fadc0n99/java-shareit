@@ -3,7 +3,7 @@ package ru.practicum.shareit.request;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.request.dto.ResponseRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
 
 import java.util.List;
@@ -16,27 +16,27 @@ public class ItemRequestController {
     private final ItemRequestService itemRequestService;
 
     @PostMapping
-    public ResponseEntity<ResponseRequestDto> createItemRequest(
+    public ResponseEntity<ItemRequestDto> createItemRequest(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestBody ResponseRequestDto dto) {
+            @RequestBody ItemRequestDto dto) {
         return ResponseEntity.ok(itemRequestService.createRequest(dto, userId));
     }
 
     @GetMapping("/{requestId}")
-    public ResponseEntity<ResponseRequestDto> getItemRequest(
+    public ResponseEntity<ItemRequestDto> getItemRequest(
             @RequestHeader("X-Sharer-User-Id") Long userId,
             @PathVariable Long requestId) {
         return ResponseEntity.ok(itemRequestService.getRequestById(userId, requestId));
     }
 
     @GetMapping
-    public ResponseEntity<List<ResponseRequestDto>> getUserItemRequests(
+    public ResponseEntity<List<ItemRequestDto>> getUserItemRequests(
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         return ResponseEntity.ok(itemRequestService.getUserRequests(userId));
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<ResponseRequestDto>> getItemRequestsByOtherUsers(
+    public ResponseEntity<List<ItemRequestDto>> getItemRequestsByOtherUsers(
             @RequestHeader("X-Sharer-User-Id") Long userId) {
         return ResponseEntity.ok(itemRequestService.getOtherUsersRequests(userId));
     }

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.request.ItemRequestRepository;
-import ru.practicum.shareit.request.dto.ResponseRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.user.model.User;
@@ -23,7 +23,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
 
     @Override
     @Transactional
-    public ResponseRequestDto createRequest(ResponseRequestDto dto, Long userId) {
+    public ItemRequestDto createRequest(ItemRequestDto dto, Long userId) {
         User user = userRepository.findByIdOrThrow(userId);
 
         ItemRequest itemRequest = itemRequestRepository.save(ItemRequestMapper.toEntity(dto, user));
@@ -31,21 +31,21 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     }
 
     @Override
-    public ResponseRequestDto getRequestById(Long userId, Long requestId) {
+    public ItemRequestDto getRequestById(Long userId, Long requestId) {
         userRepository.findByIdOrThrow(userId);
 
         return ItemRequestMapper.toDto(itemRequestRepository.findByIdOrThrow(requestId));
     }
 
     @Override
-    public List<ResponseRequestDto> getUserRequests(Long userId) {
+    public List<ItemRequestDto> getUserRequests(Long userId) {
         return itemRequestRepository.findByUserId(userId).stream()
                 .map(ItemRequestMapper::toDto)
                 .toList();
     }
 
     @Override
-    public List<ResponseRequestDto> getOtherUsersRequests(Long userId) {
+    public List<ItemRequestDto> getOtherUsersRequests(Long userId) {
         return itemRequestRepository.findByUserIdNot(userId).stream()
                 .map(ItemRequestMapper::toDto)
                 .toList();

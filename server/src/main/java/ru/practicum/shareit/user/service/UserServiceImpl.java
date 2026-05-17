@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.EmailConflictException;
 import ru.practicum.shareit.user.dto.UserDto;
-import ru.practicum.shareit.user.dto.UserResponseDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
@@ -19,7 +18,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponseDto createUser(UserDto userDto) {
+    public UserDto createUser(UserDto userDto) {
         if (isExistsAnyUserByEmail(userDto.getEmail())) {
             throw new EmailConflictException(String.format("Email %s is already exists", userDto.getEmail()));
         }
@@ -31,7 +30,7 @@ public class UserServiceImpl implements UserService {
     @Override
 
     @Transactional
-    public UserResponseDto updateUser(UserDto userDto, Long userId) {
+    public UserDto updateUser(UserDto userDto, Long userId) {
         User currentUser = userRepository.findByIdOrThrow(userId);
 
         if (userDto.getName() != null) {
@@ -54,7 +53,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponseDto getUser(Long userId) {
+    public UserDto getUser(Long userId) {
         User currentUser = userRepository.findByIdOrThrow(userId);
         return UserMapper.toDto(currentUser);
     }
