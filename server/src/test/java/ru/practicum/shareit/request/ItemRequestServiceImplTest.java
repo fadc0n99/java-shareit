@@ -17,6 +17,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -59,6 +60,18 @@ class ItemRequestServiceImplTest {
         assertThat(result.getItems(), notNullValue());
         assertThat(result.getItems().size(), equalTo(1));
         assertThat(result.getItems().getFirst().getName(), equalTo("Дрель"));
+    }
+
+    @Test
+    void testGetUserRequests() {
+        var user = userService.createUser(makeUserDto("user", "user_req@mail.com"));
+
+        itemRequestService.createRequest(makeRequestItem("desc1"), user.getId());
+        itemRequestService.createRequest(makeRequestItem("desc2"), user.getId());
+
+        var result = itemRequestService.getUserRequests(user.getId());
+
+        assertThat(result, hasSize(2));
     }
 
     private ItemRequestDto makeRequestItem(String description) {

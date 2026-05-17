@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -66,6 +67,29 @@ class BookingServiceImplTest {
         assertThat(asOwner.size(), equalTo(4));
         assertThat(bookingService.getOwnerBookings(owner.getId(), "WAITING").size(), equalTo(1));
         assertThat(bookingService.getOwnerBookings(owner.getId(), "CURRENT").size(), equalTo(1));
+    }
+
+    @Test
+    void testGetBooking() {
+        var owner = userService.createUser(makeUserDto("Owner", "own@mail.com"));
+        var booker = userService.createUser(makeUserDto("Booker", "book@mail.com"));
+        var item = itemService.createItem(makeItemDto("Item", "desc", true), owner.getId());
+
+        var booking = bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2)),
+                booker.getId()
+        );
+
+        var asOwner = bookingService.getBooking(owner.getId(), booking.getId());
+        assertThat(asOwner.getId(), equalTo(booking.getId()));
+
+        var asBooker = bookingService.getBooking(booker.getId(), booking.getId());
+        assertThat(asBooker.getId(), equalTo(booking.getId()));
+
+        var stranger = userService.createUser(makeUserDto("Stranger", "str@mail.com"));
+        assertThrows(Exception.class, () ->
+                bookingService.getBooking(stranger.getId(), booking.getId())
+        );
     }
 
     private ItemDto makeItemDto(String name, String description, boolean available) {

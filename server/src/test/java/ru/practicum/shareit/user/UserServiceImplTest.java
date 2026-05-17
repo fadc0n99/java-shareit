@@ -10,6 +10,7 @@ import ru.practicum.shareit.user.service.UserService;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -27,6 +28,23 @@ class UserServiceImplTest {
 
         assertThat(result.getName(), equalTo("abc"));
         assertThat(result.getEmail(), equalTo("abc1@mail.ru"));
+    }
+
+    @Test
+    void testDeleteUser() {
+        var user = userService.createUser(makeUserDto("abc", "delete@mail.ru"));
+        userService.deleteUser(user.getId());
+
+        assertThrows(Exception.class, () -> userService.getUser(user.getId()));
+    }
+
+    @Test
+    void testCreateUserDuplicateEmail() {
+        userService.createUser(makeUserDto("first", "dup@mail.ru"));
+
+        assertThrows(Exception.class, () ->
+                userService.createUser(makeUserDto("second", "dup@mail.ru"))
+        );
     }
 
     private UserDto makeUserDto(String name, String email) {

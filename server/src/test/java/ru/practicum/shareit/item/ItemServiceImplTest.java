@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.dto.ResponseItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @Transactional
 @RequiredArgsConstructor(onConstructor_ = @Autowired)
@@ -58,6 +60,61 @@ class ItemServiceImplTest {
 
         assertThat(itemWithBooking.getLastBooking(), nullValue());
         assertThat(itemWithBooking.getNextBooking(), notNullValue());
+    }
+
+    @Test
+    void testUpdateItem() {
+        var owner = userService.createUser(makeUserDto("Owner", "owner@mail.com"));
+        var item = itemService.createItem(makeItemDto("Original", "original desc", true), owner.getId());
+
+        var updated = new ItemDto();
+        updated.setName("Updated");
+        updated.setDescription("updated desc");
+        var result = itemService.updateItem(updated, item.getId(), owner.getId());
+
+        assertThat(result.getName(), equalTo("Updated"));
+        assertThat(result.getDescription(), equalTo("updated desc"));
+    }
+
+    @Test
+    void testGetItemById() {
+        var owner = userService.createUser(makeUserDto("Owner", "owner2@mail.com"));
+        var item = itemService.createItem(makeItemDto("Item", "desc", true), owner.getId());
+
+        var result = itemService.getItemById(item.getId());
+
+        assertThat(result.getName(), equalTo("Item"));
+    }
+
+    @Test
+    void testSearchAvailableItems() {
+        var owner = userService.createUser(makeUserDto("Owner", "owner3@mail.com"));
+        itemService.createItem(makeItemDto("Screwdriver", "A handy tool", true), owner.getId());
+        itemService.createItem(makeItemDto("Hammer", "A heavy tool", false), owner.getId());
+
+        var results = itemService.searchAvailableItems("tool");
+
+        assertThat(results.size(), equalTo(1));
+        assertThat(results.getFirst().getName(), equalTo("Screwdriver"));
+    }
+
+    @Test
+    void testCreateComment() {
+        var owner = userService.createUser(makeUserDto("Owner", "owner4@mail.com"));
+        var booker = userService.createUser(makeUserDto("Booker", "booker4@mail.com"));
+        var item = itemService.createItem(makeItemDto("Item", "desc", true), owner.getId());
+
+        var booking = bookingService.createBooking(
+                makeBookingDto(item.getId(), LocalDateTime.now().minusDays(5), LocalDateTime.now().minusDays(3)),
+                booker.getId()
+        );
+        bookingService.resolveBooking(owner.getId(), booking.getId(), true);
+
+        var commentDto = new CommentDto();
+        commentDto.setText("Great item!");
+        var result = itemService.createComment(booker.getId(), item.getId(), commentDto);
+
+        assertThat(result.getText(), equalTo("Great item!"));
     }
 
     private ItemDto makeItemDto(String name, String description, boolean available) {
