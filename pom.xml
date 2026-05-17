@@ -100,6 +100,13 @@
 					<version>0.8.12</version>
 					<configuration>
 						<output>file</output>
+						<excludes>
+							<exclude>**/dto/**</exclude>
+							<exclude>**/model/**</exclude>
+							<exclude>**/mapper/**</exclude>
+							<exclude>**/exception/**</exclude>
+							<exclude>**/ShareItServer.class</exclude>
+						</excludes>
 					</configuration>
 					<executions>
 						<execution>
