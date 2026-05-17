@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.request.dto.ItemRequestDto;
 import ru.practicum.shareit.request.service.ItemRequestService;
@@ -14,6 +15,7 @@ import ru.practicum.shareit.user.service.UserService;
 import java.util.List;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 @Transactional
@@ -36,6 +38,27 @@ class ItemRequestServiceImplTest {
         List<ItemRequestDto> itemRequestDtos = itemRequestService.getOtherUsersRequests(user2.getId());
 
         assertThat(itemRequestDtos.size(), equalTo(2));
+    }
+
+    @Test
+    void testAddItemToRequest() {
+        var user = userService.createUser(makeUserDto("user", "user@mail.com"));
+
+        ItemRequestDto request = itemRequestService.createRequest(makeRequestItem("Нужна дрель"), user.getId());
+
+        ItemDto item = new ItemDto();
+        item.setName("Дрель");
+        item.setDescription("Ударная дрель");
+        item.setAvailable(true);
+        item.setRequestId(request.getId());
+
+        itemService.createItem(item, user.getId());
+
+        ItemRequestDto result = itemRequestService.getRequestById(user.getId(), request.getId());
+
+        assertThat(result.getItems(), notNullValue());
+        assertThat(result.getItems().size(), equalTo(1));
+        assertThat(result.getItems().getFirst().getName(), equalTo("Дрель"));
     }
 
     private ItemRequestDto makeRequestItem(String description) {
