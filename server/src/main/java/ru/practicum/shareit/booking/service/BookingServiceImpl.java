@@ -7,6 +7,7 @@ import ru.practicum.shareit.booking.dto.RequestBookingDto;
 import ru.practicum.shareit.booking.dto.ResponseBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
 import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.repository.BookingRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.exception.ValidationException;
@@ -74,21 +75,21 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<ResponseBookingDto> getUserBookings(Long userId, String state) {
+    public List<ResponseBookingDto> getUserBookings(Long userId, BookingState state) {
         return getUserBookings(userId, state, false);
     }
 
     @Override
-    public List<ResponseBookingDto> getOwnerBookings(Long ownerId, String state) {
+    public List<ResponseBookingDto> getOwnerBookings(Long ownerId, BookingState state) {
         return getUserBookings(ownerId, state, true);
     }
 
-    private List<ResponseBookingDto> getUserBookings(Long userId, String state, boolean isOwner) {
+    private List<ResponseBookingDto> getUserBookings(Long userId, BookingState state, boolean isOwner) {
         userRepository.findByIdOrThrow(userId);
 
         List<Booking> userBookings = isOwner ?
-                bookingRepository.findOwnerBookingsByState(userId, state) :
-                bookingRepository.findUserBookingsByState(userId, state);
+                bookingRepository.findOwnerBookingsByState(userId, state.name()) :
+                bookingRepository.findUserBookingsByState(userId, state.name());
 
         return BookingMapper.toDtos(userBookings);
     }

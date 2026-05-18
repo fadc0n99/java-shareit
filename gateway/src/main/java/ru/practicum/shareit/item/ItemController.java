@@ -16,7 +16,7 @@ import ru.practicum.shareit.item.dto.UpdateItemDto;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class GatewayItemController {
+public class ItemController {
 
     private final ItemClient itemClient;
 

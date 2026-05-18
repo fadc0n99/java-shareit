@@ -16,7 +16,7 @@ import ru.practicum.shareit.booking.dto.BookingRequestDto;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class GatewayBookingController {
+public class BookingController {
     private final BookingClient bookingClient;
 
     @GetMapping

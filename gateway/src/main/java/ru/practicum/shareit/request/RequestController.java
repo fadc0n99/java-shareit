@@ -14,7 +14,7 @@ import ru.practicum.shareit.request.dto.RequestItemDto;
 @RequiredArgsConstructor
 @Slf4j
 @Validated
-public class GatewayRequestController {
+public class RequestController {
 
     private final ItemRequestClient itemRequestClient;
 

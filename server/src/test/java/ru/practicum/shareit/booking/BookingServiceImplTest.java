@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.service.ItemService;
@@ -56,17 +57,17 @@ class BookingServiceImplTest {
         );
         bookingService.resolveBooking(owner.getId(), currentBooking.getId(), true);
 
-        var asBooker = bookingService.getUserBookings(booker.getId(), "ALL");
+        var asBooker = bookingService.getUserBookings(booker.getId(), BookingState.ALL);
         assertThat(asBooker.size(), equalTo(4));
-        assertThat(bookingService.getUserBookings(booker.getId(), "FUTURE").size(), equalTo(2));
-        assertThat(bookingService.getUserBookings(booker.getId(), "PAST").size(), equalTo(1));
-        assertThat(bookingService.getUserBookings(booker.getId(), "WAITING").size(), equalTo(1));
-        assertThat(bookingService.getUserBookings(booker.getId(), "REJECTED").size(), equalTo(1));
+        assertThat(bookingService.getUserBookings(booker.getId(), BookingState.FUTURE).size(), equalTo(2));
+        assertThat(bookingService.getUserBookings(booker.getId(), BookingState.PAST).size(), equalTo(1));
+        assertThat(bookingService.getUserBookings(booker.getId(), BookingState.WAITING).size(), equalTo(1));
+        assertThat(bookingService.getUserBookings(booker.getId(), BookingState.REJECTED).size(), equalTo(1));
 
-        var asOwner = bookingService.getOwnerBookings(owner.getId(), "ALL");
+        var asOwner = bookingService.getOwnerBookings(owner.getId(), BookingState.ALL);
         assertThat(asOwner.size(), equalTo(4));
-        assertThat(bookingService.getOwnerBookings(owner.getId(), "WAITING").size(), equalTo(1));
-        assertThat(bookingService.getOwnerBookings(owner.getId(), "CURRENT").size(), equalTo(1));
+        assertThat(bookingService.getOwnerBookings(owner.getId(), BookingState.WAITING).size(), equalTo(1));
+        assertThat(bookingService.getOwnerBookings(owner.getId(), BookingState.CURRENT).size(), equalTo(1));
     }
 
     @Test

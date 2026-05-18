@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.RequestBookingDto;
+import ru.practicum.shareit.booking.model.BookingState;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.dto.ResponseBookingDto;
 
@@ -47,7 +48,7 @@ public class BookingController {
     @GetMapping
     public ResponseEntity<List<ResponseBookingDto>> getUserBookings(
             @RequestHeader("X-Sharer-User-Id") Long userId,
-            @RequestParam(required = false) String state
+            @RequestParam(required = false) BookingState state
             ) {
         return ResponseEntity.ok(bookingService.getUserBookings(userId, state));
     }
@@ -55,7 +56,7 @@ public class BookingController {
     @GetMapping("/owner")
     public ResponseEntity<List<ResponseBookingDto>> getOwnerBookings(
             @RequestHeader("X-Sharer-User-Id") Long ownerId,
-            @RequestParam(required = false) String state
+            @RequestParam(required = false) BookingState state
     ) {
         return ResponseEntity.ok(bookingService.getOwnerBookings(ownerId, state));
     }
